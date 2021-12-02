@@ -1,0 +1,22 @@
+# Default values for moodle-with-efs.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Moodle containers environment variables
+moodleDatabaseHost: 'emufy4t30mrjhc.csqip0g8hfcu.ap-southeast-1.rds.amazonaws.com'
+moodleDatabasePortNumber: '3306'
+moodleDatabaseName: 'moodledb'
+moodleDatabaseUser: 'dbadmin'
+moodleDatabasePasswordSecretName: 'moodle-with-efs-secrets'
+moodleDatabasePasswordSecretKey: 'moodle-db-password'
+moodleUsername: 'moodleadmin'
+moodlePasswordSecretName: 'moodle-with-efs-secrets'
+moodlePasswordSecretKey: 'moodle-password'
+moodleEmail: 'hello@example.com'
+moodleSiteName: 'Scalable Moodle on EKS'
+
+# Persistent Volume Configuration
+efsId: 'fs-0537d093d599caa45'
+
+# Ingress configurations
+albCertificateArn: 'arn:aws:acm:ap-southeast-1:545983628851:certificate/b79f9b88-c0a8-465a-a294-b7cb0527cb34'

@@ -1,0 +1,116 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "moodle-with-efs.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: moodle-with-efs
+    {{- include "moodle-with-efs.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      app: moodle-with-efs
+      {{- include "moodle-with-efs.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app: moodle-with-efs
+        {{- include "moodle-with-efs.selectorLabels" . | nindent 8 }}
+    spec:
+      volumes:
+      - name: moodle
+        persistentVolumeClaim:
+          claimName: {{ include "moodle-with-efs.fullname" . }}
+      containers:
+      - image: public.ecr.aws/t2i4q6h9/awsome-bitnami-moodle:3.11.4
+        name: {{ .Chart.Name }}
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            cpu: 1500m
+            memory: 3Gi
+        volumeMounts:
+        - name: moodle
+          mountPath: /bitnami
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 30
+          timeoutSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          periodSeconds: 60
+          timeoutSeconds: 10
+          initialDelaySeconds: 1800 # Provides enough room for Moodle first installation. This value can be adjusted once the Moodle is already installed.
+        env:
+        - name: "MOODLE_DATABASE_TYPE"
+          value: "mysqli"
+        - name: "MOODLE_DATABASE_HOST"
+          value: {{ .Values.moodleDatabaseHost | quote }}
+        - name: "MOODLE_DATABASE_PORT_NUMBER"
+          value: {{ .Values.moodleDatabasePortNumber | quote }}
+        - name: "MOODLE_DATABASE_NAME"
+          value: {{ .Values.moodleDatabaseName | quote }}
+        - name: "MOODLE_DATABASE_USER"
+          value: {{ .Values.moodleDatabaseUser | quote }}
+        - name: "MOODLE_DATABASE_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.moodleDatabasePasswordSecretName | quote }}
+              key: {{ .Values.moodleDatabasePasswordSecretKey | quote }}
+        - name: "MOODLE_USERNAME"
+          value: {{ .Values.moodleUsername | quote }}
+        - name: "MOODLE_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.moodlePasswordSecretName | quote }}
+              key: {{ .Values.moodlePasswordSecretKey | quote }}
+        - name: "MOODLE_EMAIL"
+          value: {{ .Values.moodleEmail | quote }}
+        - name: "MOODLE_SITE_NAME"
+          value: {{ .Values.moodleSiteName | quote }}
+        - name: "MOODLE_SKIP_BOOTSTRAP"
+          value: "no"
+        - name: "MOODLE_SKIP_INSTALL"
+          value: "no"
+        - name: "BITNAMI_DEBUG"
+          value: "true"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 30
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - "moodle-with-efs"
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+          - weight: 20
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - "moodle-with-efs"
+              topologyKey: beta.kubernetes.io/instance-type
+          - weight: 10
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - "moodle-with-efs"
+              topologyKey: kubernetes.io/hostname

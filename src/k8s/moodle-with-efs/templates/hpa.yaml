@@ -1,0 +1,15 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "moodle-with-efs.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "moodle-with-efs.labels" . | nindent 4 }}
+spec:
+  maxReplicas: 30
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 50
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "moodle-with-efs.fullname" . }}
