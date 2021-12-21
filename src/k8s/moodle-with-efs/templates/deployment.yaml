@@ -33,7 +33,7 @@ spec:
         - containerPort: 8080
         resources:
           requests:
-            cpu: 1500m
+            cpu: 1000m
             memory: 3Gi
         volumeMounts:
         - name: moodle

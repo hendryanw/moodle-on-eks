@@ -19,4 +19,4 @@ moodleSiteName: 'Scalable Moodle on EKS'
 efsId: 'fs-0537d093d599caa45'
 
 # Ingress configurations
-albCertificateArn: 'arn:aws:acm:ap-southeast-1:545983628851:certificate/b79f9b88-c0a8-465a-a294-b7cb0527cb34'
+albCertificateArn: 'arn:aws:acm:ap-southeast-1:545983628851:certificate/601752a0-f414-491b-b47c-f791c148a0d2'
